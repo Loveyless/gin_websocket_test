@@ -1,0 +1,64 @@
+{
+	"info": {
+		"_postman_id": "e63f9740-f809-4ae2-b552-5dd854ed697a",
+		"name": "websocket项目",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "用户相关",
+			"item": [
+				{
+					"name": "用户详情",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzMmZlYWM5YzI2YzAwMDAwMzAwMTE3NSIsInVzZXJuYW1lIjoiMTIzIiwiZW1haWwiOiIxMjMiLCJleHAiOjE2NjQxNzQ4MjgsIm5iZiI6MTY2NDA4ODQyOCwiaWF0IjoxNjY0MDg4NDI4fQ.y7WDSqrPbbZkiAuWlSQkAWBe0G-_jfq1Cnczake7txc",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{baseURL}}/user/detail",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"user",
+								"detail"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "登录",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\":\"123\",\r\n    \"password\":\"123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/login",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

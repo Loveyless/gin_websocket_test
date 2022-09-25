@@ -15,6 +15,7 @@ func Start() {
 
 	//登录
 	r.POST("/login", controller.Login)
+	r.POST("/send/code", controller.SendCode)
 
 	//用户相关的分组 需要验证token
 	user := r.Group("/user", MyJwt.FilterToken())

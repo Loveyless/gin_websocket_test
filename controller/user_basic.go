@@ -2,8 +2,10 @@ package controller
 
 import (
 	"gin_websocket_test/MyJwt"
+	"gin_websocket_test/email"
 	"gin_websocket_test/service"
 	"gin_websocket_test/validator"
+	"log"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -121,5 +123,55 @@ func UserDetail(c *gin.Context) {
 		"status":  200,
 		"message": "",
 		"data":    ub,
+	})
+}
+
+//发送验证码
+func SendCode(c *gin.Context) {
+
+	//获取请求数据并验证
+	emailInfo := struct {
+		Email string `json:"email" binding:"required,email"`
+	}{}
+	err := c.ShouldBind(&emailInfo)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"status": 400,
+			"data":   validator.Translate(err),
+		})
+		c.Abort()
+		return
+	}
+
+	//查询是否存在
+	exist := service.GetUserBasicByEmail(emailInfo.Email)
+	if exist {
+		c.JSON(200, gin.H{
+			"status":  400,
+			"message": "邮箱已存在",
+			"data":    gin.H{},
+		})
+		c.Abort()
+		return
+	}
+
+	//发送验证码
+	ok := email.SendEmailCode(emailInfo.Email, "123456")
+	if !ok {
+		log.Println("发送验证码失败", err)
+		c.JSON(200, gin.H{
+			"status":  400,
+			"message": "发送失败",
+			"data":    err.Error(),
+		})
+		c.Abort()
+		return
+	}
+
+	//返回
+	c.JSON(200, gin.H{
+		"status":  200,
+		"message": "发送成功",
+		"data":    nil,
 	})
 }

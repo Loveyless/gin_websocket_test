@@ -23,7 +23,7 @@ func (UserBasic) CollectionName() string {
 	return "user_basic"
 }
 
-//查询用户
+//查询用户通过账号密码
 func GetUserBasicByUsernamePassword(username, password string) (*UserBasic, error) {
 	ub := new(UserBasic)
 	err := Mongo.Collection(UserBasic{}.CollectionName()).
@@ -32,11 +32,18 @@ func GetUserBasicByUsernamePassword(username, password string) (*UserBasic, erro
 	return ub, err
 }
 
-//用户详情
+//用户详情通过id
 func GetUserBasicByIdentity(identity primitive.ObjectID) (*UserBasic, error) {
 	ub := new(UserBasic)
 	err := Mongo.Collection(UserBasic{}.CollectionName()).
 		FindOne(context.TODO(),
 			bson.D{{Key: "_id", Value: identity}}).Decode(ub)
 	return ub, err
+}
+
+//查询用户通过邮箱、
+func GetUserBasicByEmail(emailString string) bool {
+	sum, err := Mongo.Collection(UserBasic{}.CollectionName()).
+		CountDocuments(context.TODO(), bson.D{{Key: "email", Value: emailString}})
+	return (err == nil && sum > 0)
 }

@@ -4,11 +4,10 @@ import (
 	"context"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UserBasic struct {
-	Id        string `json:"_id" bson:"_id"`
+	Identity  string `json:"identity" bson:"identity"`
 	Username  string `json:"username" bson:"username"`
 	Password  string `json:"password" bson:"password"`
 	Nicname   string `json:"nicname" bson:"nicname"`
@@ -32,16 +31,16 @@ func GetUserBasicByUsernamePassword(username, password string) (*UserBasic, erro
 	return ub, err
 }
 
-//用户详情通过id
-func GetUserBasicByIdentity(identity primitive.ObjectID) (*UserBasic, error) {
+//用户详情通过identity
+func GetUserBasicByIdentity(identity string) (*UserBasic, error) {
 	ub := new(UserBasic)
 	err := Mongo.Collection(UserBasic{}.CollectionName()).
 		FindOne(context.TODO(),
-			bson.D{{Key: "_id", Value: identity}}).Decode(ub)
+			bson.D{{Key: "identity", Value: identity}}).Decode(ub)
 	return ub, err
 }
 
-//查询用户通过邮箱、
+//查询用户通过邮箱 (用于校验数据库是否有这个邮箱)
 func GetUserBasicByEmail(emailString string) bool {
 	sum, err := Mongo.Collection(UserBasic{}.CollectionName()).
 		CountDocuments(context.TODO(), bson.D{{Key: "email", Value: emailString}})

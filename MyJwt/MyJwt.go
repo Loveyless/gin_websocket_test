@@ -1,6 +1,8 @@
 package MyJwt
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 )
@@ -19,7 +21,7 @@ var key = []byte("loveyless")
 
 //验证负载结构体
 type MyCustomClaims struct {
-	Id       string `json:"_id"`
+	Identity string `json:"identity"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	// Password             string `json:"password"`
@@ -32,7 +34,7 @@ func FilterToken() gin.HandlerFunc {
 
 		token := c.GetHeader("token")
 
-		// 过滤不需要的路径
+		// 过滤不需要的路径 可以使用路由分组实现
 		// for _, v := range FilterSlice {
 		// 	if c.Request.URL.Path == v {
 		// 		c.Next()
@@ -61,12 +63,12 @@ func FilterToken() gin.HandlerFunc {
 			return
 		}
 
-		// //可选步骤 解析一下token 把值挂在上下文中 到时候直接Get获取 但是获取时 是any类型 还要转回来 *MyCustomClaims
-		// claims, _ := ParseToken(token)
-		// fmt.Println("解析后的负载", claims)
+		//可选步骤 解析一下token 把值挂在上下文中 到时候直接Get获取 但是获取时 是any类型 还要转回来 *MyCustomClaims
+		claims, _ := ParseToken(token)
+		fmt.Println("解析后的负载", claims)
 
-		// // //挂载
-		// c.Set("claims", claims)
+		// // 挂载到上下文中
+		c.Set("claims", claims)
 
 	}
 }

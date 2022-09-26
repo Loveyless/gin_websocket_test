@@ -15,6 +15,7 @@ func Start() {
 
 	//登录
 	r.POST("/login", controller.Login)
+	//发送验证码
 	r.POST("/send/code", controller.SendCode)
 
 	//用户相关的分组 需要验证token
@@ -22,6 +23,8 @@ func Start() {
 
 	// 用户详情
 	user.GET("/detail", controller.UserDetail)
+	// 发送接收消息
+	user.GET("/websocket/message", controller.WebsocketMessage)
 
 	r.Run()
 }

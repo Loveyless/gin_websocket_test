@@ -10,7 +10,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 //登录
@@ -45,7 +44,7 @@ func Login(c *gin.Context) {
 
 	//生成token
 	claims := MyJwt.MyCustomClaims{
-		Id:       u.Id,
+		Identity: u.Identity,
 		Username: u.Username,
 		Email:    u.Email,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -78,36 +77,39 @@ func Login(c *gin.Context) {
 //用户详情
 func UserDetail(c *gin.Context) {
 
-	//从token中获取负载
-	tokenString := c.GetHeader("token")
+	// //获取token
+	// tokenString := c.GetHeader("token")
 
-	//解析负载
-	t, err := MyJwt.ParseToken(tokenString)
-	if err != nil {
-		c.JSON(200, gin.H{
-			"status":  400,
-			"message": "查询失败",
-			"data":    validator.Translate(err),
-		})
-		c.Abort()
-		return
-	}
+	// //解析负载
+	// userInfo, err := MyJwt.ParseToken(tokenString)
+	// if err != nil {
+	// 	c.JSON(200, gin.H{
+	// 		"status":  400,
+	// 		"message": "查询失败",
+	// 		"data":    validator.Translate(err),
+	// 	})
+	// 	c.Abort()
+	// 	return
+	// }
+
+	// 直接获取负载不采用上面的获取解析(在中间件已经解析过了)
+	userInfo := c.MustGet("claims").(*MyJwt.MyCustomClaims) //需要断言 还可以使用get
 
 	//通过负载中的id查询
-	//通过id查询 但是mongo需要的id不是字符串类型 转一下
-	id, err := primitive.ObjectIDFromHex(t.Id)
-	if err != nil {
-		c.JSON(200, gin.H{
-			"status":  400,
-			"message": "查询失败",
-			"data":    err.Error(),
-		})
-		c.Abort()
-		return
-	}
+	// id string转objectid 通过id查询 但是mongo需要的id不是字符串类型 转一下 !!在websocket后 这里不需要转了 因为不用mongodb的id了 用自己的字段Identity
+	// id, err := primitive.ObjectIDFromHex(userInfo.Id)
+	// if err != nil {
+	// 	c.JSON(200, gin.H{
+	// 		"status":  400,
+	// 		"message": "查询失败",
+	// 		"data":    err.Error(),
+	// 	})
+	// 	c.Abort()
+	// 	return
+	// }
 
 	//查询
-	ub, err := service.GetUserBasicByIdentity(id)
+	ub, err := service.GetUserBasicByIdentity(userInfo.Identity)
 	if err != nil {
 		c.JSON(200, gin.H{
 			"status":  400,

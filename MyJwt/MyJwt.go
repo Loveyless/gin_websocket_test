@@ -1,8 +1,6 @@
 package MyJwt
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 )
@@ -65,7 +63,7 @@ func FilterToken() gin.HandlerFunc {
 
 		//可选步骤 解析一下token 把值挂在上下文中 到时候直接Get获取 但是获取时 是any类型 还要转回来 *MyCustomClaims
 		claims, _ := ParseToken(token)
-		fmt.Println("解析后的负载", claims)
+		// fmt.Println("解析后的负载", claims)
 
 		// // 挂载到上下文中
 		c.Set("claims", claims)

@@ -10,5 +10,5 @@ type RoomBasic struct {
 }
 
 func (RoomBasic) CollectionName() string {
-	return "user_basic"
+	return "room_basic"
 }

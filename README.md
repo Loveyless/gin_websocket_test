@@ -136,3 +136,300 @@ func TestSendEmail(t *testing.T) {
   }
 }
 ```
+
+## websocket服务！！！！耶耶耶牛逼
+
+
+
+
+
+官方包里有示例
+
+![](https://cdn.jsdelivr.net/gh/Loveyless/img-clouding/img/20220926010818.png)
+
+
+
+### **echo简易版**
+
+比官方的还简易
+
+![](https://cdn.jsdelivr.net/gh/Loveyless/img-clouding/img/20220926014024.png)
+
+```Go
+package test
+
+import (
+  "flag"
+  "log"
+  "net/http"
+  "testing"
+
+  "github.com/gorilla/websocket"
+)
+
+//
+var addr = flag.String("addr", "localhost:8080", "http service address")
+
+// Upgrader指定升级HTTP连接为WebSocket连接。
+// 并发调用Upgrader的方法是安全的。
+var upgrader = websocket.Upgrader{}
+
+//这个里面先不用管
+func echo(w http.ResponseWriter, r *http.Request) {
+
+  c, err := upgrader.Upgrade(w, r, nil)
+  if err != nil {
+    log.Print("upgrade:", err)
+    return
+  }
+  defer c.Close()
+  for {
+    mt, message, err := c.ReadMessage()
+    if err != nil {
+      log.Println("read:", err)
+      break
+    }
+    log.Printf("recv: %s", message)
+    err = c.WriteMessage(mt, message)
+    if err != nil {
+      log.Println("write:", err)
+      break
+    }
+  }
+}
+
+
+func TestWebsocket(t *testing.T) {
+  // /echo接口
+  http.HandleFunc("/echo", echo)
+  log.Fatal(http.ListenAndServe(*addr, nil))
+}
+```
+
+
+
+
+
+### 切片存句柄 一对多
+
+但是会给自己也发一条
+
+```Go
+package test
+
+import (
+  "flag"
+  "log"
+  "net/http"
+  "testing"
+
+  "github.com/gorilla/websocket"
+)
+
+//
+var addr = flag.String("addr", "localhost:8080", "http service address")
+
+// Upgrader指定升级HTTP连接为WebSocket连接。
+// 并发调用Upgrader的方法是安全的。
+var upgrader = websocket.Upgrader{}
+
+//一对多 定义一个wsList切片
+var wsList = make([]*websocket.Conn, 0)
+
+func echo(w http.ResponseWriter, r *http.Request) {
+
+  // Conn 类型表示一个 WebSocket 连接。服务器应用程序从 HTTP 请求处理程序调用 Upgrader.Upgrade 方法以获取 *Conn：
+  conn, err := upgrader.Upgrade(w, r, nil)
+  if err != nil {
+    log.Print("upgrade:", err)
+    return
+  }
+  defer conn.Close()
+
+  //如果有人连接 放到切片里
+  wsList = append(wsList, conn)
+
+  for {
+    mt, message, err := conn.ReadMessage()
+    if err != nil {
+      log.Println("read:", err)
+      break
+    }
+
+    //循环切片 一个一个发送 一对多 上面的逻辑先别管
+    for _, conn := range wsList {
+      conn.WriteMessage(mt, message)
+    }
+    if err != nil {
+      log.Println("write:", err)
+      break
+    }
+  }
+}
+
+func TestWebsocket(t *testing.T) {
+  http.HandleFunc("/echo", echo)
+  log.Fatal(http.ListenAndServe(*addr, nil))
+}
+
+```
+
+
+
+
+
+### gin中搭建websocket
+
+```Go
+func TestGinWebsocket(t *testing.T) {
+  r := gin.Default()
+  //websocket
+  r.GET("/echo", func(c *gin.Context) {
+    //c.Writer实现了http.ResponseWriter接口
+    //c.Request实现了*http.Request接口
+    echo(c.Writer, c.Request)
+  })
+  r.Run()
+}
+
+
+//
+var addr = flag.String("addr", "localhost:8080", "http service address")
+
+// Upgrader指定升级HTTP连接为WebSocket连接。
+// 并发调用Upgrader的方法是安全的。
+var upgrader = websocket.Upgrader{}
+
+//一对多 定义一个wsList切片
+var wsList = make([]*websocket.Conn, 0)
+
+func echo(w http.ResponseWriter, r *http.Request) {
+
+  // Conn 类型表示一个 WebSocket 连接。服务器应用程序从 HTTP 请求处理程序调用 Upgrader.Upgrade 方法以获取 *Conn：
+  conn, err := upgrader.Upgrade(w, r, nil)
+  if err != nil {
+    log.Print("upgrade:", err)
+    return
+  }
+  defer conn.Close()
+
+  //如果有人连接 放到切片里
+  wsList = append(wsList, conn)
+
+  for {
+    mt, message, err := conn.ReadMessage()
+    if err != nil {
+      log.Println("read:", err)
+      break
+    }
+
+    //循环切片 一个一个发送 一对多 上面的逻辑先别管
+    for _, conn := range wsList {
+      conn.WriteMessage(mt, message)
+    }
+    if err != nil {
+      log.Println("write:", err)
+      break
+    }
+  }
+}
+
+```
+
+
+
+
+
+## websocket核心 发送/接收 消息
+
+**简易版**
+
+router
+
+```Go
+
+  //用户相关的分组 需要验证token
+  user := r.Group("/user", MyJwt.FilterToken())
+  
+  // 发送接收消息
+  user.GET("/websocket/message", controller.WebsocketMessage)
+```
+
+websocket controller
+
+```Go
+package controller
+
+import (
+  "fmt"
+  "gin_websocket_test/MyJwt"
+  "log"
+
+  "github.com/gin-gonic/gin"
+  "github.com/gorilla/websocket"
+)
+
+// Upgrader指定升级HTTP连接为WebSocket连接。
+// 并发调用Upgrader的方法是安全的。
+var upgrader = websocket.Upgrader{}
+
+//存储conn句柄的map key是用户id value是conn句柄
+var wsMap = make(map[string]*websocket.Conn)
+
+//接收发送消息的结构体
+type MessageStruct struct {
+  RoomIdentity string `json:"room_identity"` //接收房间
+  Message      string `json:"message"`       //内容
+}
+
+// 发送接收消息
+func WebsocketMessage(c *gin.Context) {
+
+  //Upgrade将HTTP服务器连接升级到WebSocket协议。返回句柄
+  conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+  if err != nil {
+    c.JSON(200, gin.H{
+      "status":  400,
+      "message": "wensocket升级失败",
+      "data":    err,
+    })
+    c.Abort()
+    return
+  }
+  defer conn.Close()
+
+  // token取出数据
+  claims := c.MustGet("claims").(*MyJwt.MyCustomClaims)
+  fmt.Println(claims.Identity)
+  //存入map集合
+  wsMap[claims.Identity] = conn
+
+  //核心 for一直接收消息
+  for {
+    messaageInfo := new(MessageStruct)
+    err := conn.ReadJSON(messaageInfo) //readjson格式化到结构体 ReadMessage是原始的 单测用的message接收的可以去看 发送可以用message
+    if err != nil {
+      log.Println("读取数据失败", err.Error())
+      return
+    }
+
+    //发送消息 目前是给所有再线用户发 后面优化成给所有在线 并且在同一个房间的用户发
+    for _, conn := range wsMap {
+      //TextMessage表示文本数据消息。文本消息有效负载被解释为UTF-8编码的文本数据。
+      //消息类型是一个整数，表示消息的类型，它的值可以是下面几个常量之一： TextMessage对应1、BinaryMessage、CloseMessage、PingMessage、PongMessage
+      err := conn.WriteMessage(websocket.TextMessage, []byte(messaageInfo.Message))
+      if err != nil {
+        log.Println("发送数据失败", err.Error())
+        return
+      }
+    }
+  }
+
+}
+
+```
+
+
+
+
+

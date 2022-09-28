@@ -1,6 +1,11 @@
 package service
 
-import "context"
+import (
+	"context"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
 
 type MessageBasic struct {
 	UserIdentity string `json:"user_identity" bson:"user_identity"`
@@ -19,4 +24,30 @@ func InsertOneMessageBasic(messageBasic *MessageBasic) error {
 	_, err := Mongo.Collection(MessageBasic{}.CollectionName()).
 		InsertOne(context.Background(), messageBasic)
 	return err
+}
+
+func GetMessageListByRoomIdentity(roomIdentity string, limit int64, offset int64) ([]*MessageBasic, error) {
+
+	messageList := make([]*MessageBasic, 0)
+
+	cur, err := Mongo.Collection(MessageBasic{}.CollectionName()).
+		Find(context.Background(), bson.D{{Key: "room_identity", Value: roomIdentity}}, &options.FindOptions{
+			Limit: &limit,
+			Skip:  &offset,
+			Sort:  bson.D{{Key: "crated_at", Value: -1}}, //倒序 降序
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	for cur.Next(context.TODO()) {
+		item := new(MessageBasic)
+		err := cur.Decode(item)
+		if err != nil {
+			return nil, err
+		}
+		messageList = append(messageList, item)
+	}
+
+	return messageList, err
 }

@@ -26,5 +26,8 @@ func Start() {
 	// 发送接收消息
 	user.GET("/websocket/message", controller.WebsocketMessage)
 
+	//用户聊天记录列表
+	user.GET("/chat/list", controller.ChatList)
+
 	r.Run()
 }

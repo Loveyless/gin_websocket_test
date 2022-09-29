@@ -112,6 +112,8 @@ gin+mongodb
 
 ## 邮箱库的使用
 
+### 发邮件
+
 ![](https://cdn.jsdelivr.net/gh/Loveyless/img-clouding/img/下载.png)
 
 ```Go
@@ -136,6 +138,16 @@ func TestSendEmail(t *testing.T) {
   }
 }
 ```
+
+
+
+### 邮箱验证注册
+
+time.Duration的使用
+
+https://blog.csdn.net/taoshihan/article/details/125924020?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-0-125924020-blog-82706022.t0_edu_mix&spm=1001.2101.3001.4242.1&utm_relevant_index=1
+
+
 
 ## websocket服务！！！！耶耶耶牛逼
 
@@ -340,11 +352,11 @@ func echo(w http.ResponseWriter, r *http.Request) {
 
 
 
-## websocket核心 发送/接收 消息
+### websocket核心 发送/接收 消息
 
 **简易版**
 
-router
+**router**
 
 ```Go
 
@@ -355,7 +367,11 @@ router
   user.GET("/websocket/message", controller.WebsocketMessage)
 ```
 
-websocket controller
+**websocket controller**
+
+核心就是发送接收消息 
+
+后期在协议前 存入了用户句柄 判读用户是否在带过来的房间 遍历出在线用户的 conn 在write发送消息
 
 ```Go
 package controller
@@ -428,6 +444,8 @@ func WebsocketMessage(c *gin.Context) {
 }
 
 ```
+
+
 
 
 

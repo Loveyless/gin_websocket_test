@@ -22,7 +22,7 @@ func (UserBasic) CollectionName() string {
 	return "user_basic"
 }
 
-//查询用户通过账号密码
+//验证查询用户通过账号密码
 func GetUserBasicByUsernamePassword(username, password string) (*UserBasic, error) {
 	ub := new(UserBasic)
 	err := Mongo.Collection(UserBasic{}.CollectionName()).
@@ -44,5 +44,12 @@ func GetUserBasicByIdentity(identity string) (*UserBasic, error) {
 func GetUserBasicByEmail(emailString string) bool {
 	sum, err := Mongo.Collection(UserBasic{}.CollectionName()).
 		CountDocuments(context.TODO(), bson.D{{Key: "email", Value: emailString}})
+	return (err == nil && sum > 0)
+}
+
+//查询用户通过用户名 (用于校验数据库是否有这个用户名)
+func GetUserBasicByUsername(username string) bool {
+	sum, err := Mongo.Collection(UserBasic{}.CollectionName()).
+		CountDocuments(context.TODO(), bson.D{{Key: "username", Value: username}})
 	return (err == nil && sum > 0)
 }

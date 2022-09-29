@@ -15,6 +15,8 @@ func Start() {
 
 	//登录
 	r.POST("/login", controller.Login)
+	//注册
+	r.POST("/register", controller.Register)
 	//发送验证码
 	r.POST("/send/code", controller.SendCode)
 

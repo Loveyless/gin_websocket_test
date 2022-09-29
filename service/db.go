@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/go-redis/redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var Mongo = InitMongo()
+var Rdb = InitRedis()
 
 func InitMongo() *mongo.Database {
 	ctx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
@@ -27,4 +29,12 @@ func InitMongo() *mongo.Database {
 	}
 
 	return client.Database("go_test")
+}
+
+func InitRedis() *redis.Client {
+	return redis.NewClient(&redis.Options{
+		Addr:     "101.200.243.101:6379",
+		Password: "at123123", // no password set
+		DB:       10,         // use default DB
+	})
 }

@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"context"
 	"gin_websocket_test/MyJwt"
+	"gin_websocket_test/config"
 	"gin_websocket_test/email"
 	"gin_websocket_test/service"
 	"gin_websocket_test/validator"
@@ -9,8 +11,13 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-redis/redis/v9/internal/util"
 	"github.com/golang-jwt/jwt/v4"
 )
+
+//redis需要用到
+var ctx = context.Background()
 
 //登录
 func Login(c *gin.Context) {
@@ -128,6 +135,70 @@ func UserDetail(c *gin.Context) {
 	})
 }
 
+//注册
+func Register(c *gin.Context) {
+	//匿名结构体
+	info := struct {
+		Username string `json:"username" binding:"required,min=3,max=20"`
+		Password string `json:"password" binding:"required,min=3,max=20"`
+		Email    string `json:"email" binding:"required,email"`
+		Code     string `json:"code" binding:"required"`
+	}{}
+	err := c.ShouldBindWith(info, binding.JSON)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"status":  400,
+			"message": "参数错误",
+			"data":    validator.Translate(err),
+		})
+		c.Abort()
+		return
+	}
+
+	//验证验证码
+	emailCode, err := service.Rdb.Get(context.Background(), config.RegisterPrefix+info.Email).Result()
+	if err != nil {
+		c.JSON(200, gin.H{
+			"status":  200,
+			"message": "验证码已过期",
+			"data":    err.Error(),
+		})
+		c.Abort()
+		return
+	}
+	if emailCode != info.Code {
+		c.JSON(200, gin.H{
+			"status":  200,
+			"message": "验证码错误",
+			"data":    gin.H{},
+		})
+		c.Abort()
+		return
+	}
+
+	// 判断账号是否唯一
+	exist1 := service.GetUserBasicByUsername(info.Username)
+	exist2 := service.GetUserBasicByEmail(info.Email)
+	if exist1 || exist2 {
+		c.JSON(200, gin.H{
+			"status":  200,
+			"message": "用户名或邮箱已存在",
+			"data":    gin.H{},
+		})
+		c.Abort()
+		return
+	}
+
+	//存入数据库
+	userBasic := service.UserBasic{
+		Identity: uuid.NewV4().String(), //生成uuid
+		Username: info.Username,
+		Password: util.Md5(info.Password),
+		Email:    info.Email,
+	}
+
+}
+
 //发送验证码
 func SendCode(c *gin.Context) {
 
@@ -158,7 +229,10 @@ func SendCode(c *gin.Context) {
 	}
 
 	//发送验证码
-	ok := email.SendEmailCode(emailInfo.Email, "123456")
+	//生成
+	emailCode := email.GetEmailCode()
+	//发送
+	ok := email.SendEmailCode(emailInfo.Email, emailCode)
 	if !ok {
 		log.Println("发送验证码失败", err)
 		c.JSON(200, gin.H{
@@ -166,6 +240,18 @@ func SendCode(c *gin.Context) {
 			"message": "发送失败",
 			"data":    err.Error(),
 		})
+		c.Abort()
+		return
+	}
+	//存入redis 30秒过期
+	err = service.Rdb.Set(ctx, config.RegisterPrefix+emailInfo.Email, emailCode, time.Second*time.Duration(config.RegisterLowTime)).Err()
+	if err != nil {
+		c.JSON(200, gin.H{
+			"status":  400,
+			"message": "redis内部出错",
+			"data":    err.Error(),
+		})
+		log.Println("redis内部出错", err)
 		c.Abort()
 		return
 	}

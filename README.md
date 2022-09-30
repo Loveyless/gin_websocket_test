@@ -67,6 +67,7 @@ room
     "name":"房间名",
     "info":"简介",
     "user_identity":"房间创建者的唯一标识",
+    "room_type":"房间类型",    //[1独聊] [2群聊]
     "created_at":1,
     "updated_at":1,
 }
@@ -146,6 +147,23 @@ func TestSendEmail(t *testing.T) {
 time.Duration的使用
 
 https://blog.csdn.net/taoshihan/article/details/125924020?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-0-125924020-blog-82706022.t0_edu_mix&spm=1001.2101.3001.4242.1&utm_relevant_index=1
+
+
+
+redis存一个 key为邮箱30秒过期 和 value验证码
+
+到时候拿出来比对
+
+```go
+set验证码就是Set                                                                这里拿到全局config里面的过期时间 用time.Duration处理一下
+err = service.Rdb.Set(ctx, config.RegisterPrefix+emailInfo.Email, emailCode, time.Second*time.Duration(config.RegisterLowTime)).Err()
+
+
+验证就是Getredis
+emailCode, err := service.Rdb.Get(context.Background(), config.RegisterPrefix+info.Email).Result()
+```
+
+
 
 
 
@@ -444,6 +462,46 @@ func WebsocketMessage(c *gin.Context) {
 }
 
 ```
+
+
+
+
+
+## 查询别人个人资料
+
+查询别人的资料并且是否为好友
+
+get请求/query/detail
+
+还是比较小复杂的 对比两个人you'mei
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

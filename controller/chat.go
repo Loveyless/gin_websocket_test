@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//获取聊天列表
+//获取聊天记录
 func ChatList(c *gin.Context) {
 	// 1. 判断他是否属于这个房间
 	// 2. 查出聊天记录

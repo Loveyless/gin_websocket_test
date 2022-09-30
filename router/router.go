@@ -23,8 +23,10 @@ func Start() {
 	//用户相关的分组 需要验证token
 	user := r.Group("/user", MyJwt.FilterToken())
 
-	// 用户详情
+	// 用户详情 从token中的identity获取
 	user.GET("/detail", controller.UserDetail)
+	// 用户详情 用传递的identity获取
+	user.GET("/query/detail", controller.UserQueryDetail)
 	// 发送接收消息
 	user.GET("/websocket/message", controller.WebsocketMessage)
 

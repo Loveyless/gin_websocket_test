@@ -1,7 +1,9 @@
-package utils
+package MyUtils
 
 import (
 	"crypto/md5"
+
+	"github.com/google/uuid"
 )
 
 func Md5(str string) string {
@@ -9,7 +11,6 @@ func Md5(str string) string {
 	return string(b[:])
 }
 
-//mongo自带的uuid
 func Uuid() string {
-	uuid, _ := uuid.NewV4()
+	return uuid.NewString()
 }

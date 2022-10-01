@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "e63f9740-f809-4ae2-b552-5dd854ed697a",
+		"_postman_id": "0673c659-aa81-402b-9d81-26a043370a8a",
 		"name": "websocket项目",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -9,13 +9,13 @@
 			"name": "用户相关",
 			"item": [
 				{
-					"name": "用户详情",
+					"name": "自己的用户详情 通过token",
 					"request": {
 						"method": "GET",
 						"header": [
 							{
 								"key": "token",
-								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzMmZlYWM5YzI2YzAwMDAwMzAwMTE3NSIsInVzZXJuYW1lIjoiMTIzIiwiZW1haWwiOiIxMjMiLCJleHAiOjE2NjQxNzQ4MjgsIm5iZiI6MTY2NDA4ODQyOCwiaWF0IjoxNjY0MDg4NDI4fQ.y7WDSqrPbbZkiAuWlSQkAWBe0G-_jfq1Cnczake7txc",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGl0eSI6IjgxOTc0NDcxIiwidXNlcm5hbWUiOiIxMjMiLCJlbWFpbCI6IjFAcXEuY29tIiwiZXhwIjoxNjY0NjQ2MzEyLCJuYmYiOjE2NjQ1NTk5MTIsImlhdCI6MTY2NDU1OTkxMn0.2C1p-7hrMNDx8VzjhAFeS8qqOtTFxJrxcgStrNZPeWA",
 								"type": "default"
 							}
 						],
@@ -27,6 +27,160 @@
 							"path": [
 								"user",
 								"detail"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取聊天记录",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGl0eSI6IjgxOTc0NDcxIiwidXNlcm5hbWUiOiIxMjMiLCJlbWFpbCI6IjFAcXEuY29tIiwiZXhwIjoxNjY0NDY3NTM2LCJuYmYiOjE2NjQzODExMzYsImlhdCI6MTY2NDM4MTEzNn0.64IcIiK_5-wnLt_L0b9uZ65EcRCrdqwvD5DNmmc8iug",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/user/chat/list?room_identity=888&page_index=1&limit=10",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"user",
+								"chat",
+								"list"
+							],
+							"query": [
+								{
+									"key": "room_identity",
+									"value": "888"
+								},
+								{
+									"key": "page_index",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "别人的用户详情 通过query",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGl0eSI6IjgxOTc0NDcxIiwidXNlcm5hbWUiOiIxMjMiLCJlbWFpbCI6IjFAcXEuY29tIiwiZXhwIjoxNjY0NjQ2MzEyLCJuYmYiOjE2NjQ1NTk5MTIsImlhdCI6MTY2NDU1OTkxMn0.2C1p-7hrMNDx8VzjhAFeS8qqOtTFxJrxcgStrNZPeWA",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{baseURL}}/user/query/detail?user_name=1234",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"user",
+								"query",
+								"detail"
+							],
+							"query": [
+								{
+									"key": "user_name",
+									"value": "1234"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "添加好友",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGl0eSI6IjgxOTc0NDcxIiwidXNlcm5hbWUiOiIxMjMiLCJlbWFpbCI6IjFAcXEuY29tIiwiZXhwIjoxNjY0NzA1OTgwLCJuYmYiOjE2NjQ2MTk1ODAsImlhdCI6MTY2NDYxOTU4MH0.Ah3wpw4SOiLqotnTkSBgUVjiRBO3nwN06j0egp0k2Iw",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_name\":\"账号1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/user/add",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"user",
+								"add"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "添加好友 Copy",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGl0eSI6IjgxOTc0NDcxIiwidXNlcm5hbWUiOiIxMjMiLCJlbWFpbCI6IjFAcXEuY29tIiwiZXhwIjoxNjY0NjQ2MzEyLCJuYmYiOjE2NjQ1NTk5MTIsImlhdCI6MTY2NDU1OTkxMn0.2C1p-7hrMNDx8VzjhAFeS8qqOtTFxJrxcgStrNZPeWA",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_name\":\"123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/user/delete?user_identity=123",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"user",
+								"delete"
+							],
+							"query": [
+								{
+									"key": "user_identity",
+									"value": "123"
+								}
 							]
 						}
 					},
@@ -55,6 +209,59 @@
 					],
 					"path": [
 						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "发送验证码",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\":\"loveyless@126.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/send/code",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"send",
+						"code"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "注册",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\":\"4444\",\r\n    \"password\":\"2222\",\r\n    \"email\":\"loveyle33ss@126.com\",\r\n    \"code\":\"496056\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/register",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"register"
 					]
 				}
 			},

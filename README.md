@@ -97,17 +97,46 @@ gin+mongodb
 
 目录结构
 ```
+|-config      基本配置
 |-controller  基础逻辑
 |-cors        跨域中间件
 |-email       封装发送邮箱
 |-MyJwt       token中间件
+|-MyUtils     工具
 |-router      路由 分组/拦截
 |-service     操作数据的函数
-    mongodb.go    连接mongo数据库
-|-test        测试
-|-utils       工具库
+    db.go     mongo redis数据库句柄
+|-test        测试函数
+|-validator   request校验
 |-validator   将gin验证器错误翻译成中文
+|-go_test.sql mongodb导出导入文件
+|-go.mod
+|-gosum
 |-main.go
+|-websocket项目.postman_collection.json postman导出导入文件
+```
+
+
+
+
+
+## 接口规则
+
+
+
+普通接口规则在postman
+
+websocket协议接口规则
+
+```go
+ws://localhost:8080/user/websocket/message
+请求头
+	token
+接收发送消息的结构体
+    type MessageStruct struct {
+        RoomIdentity string `json:"room_identity"` //接收房间
+        Message      string `json:"message"`       //内容
+    }
 ```
 
 
@@ -168,7 +197,7 @@ emailCode, err := service.Rdb.Get(context.Background(), config.RegisterPrefix+in
 
 
 
-## websocket服务！！！！耶耶耶牛逼
+## websocket服务
 
 
 

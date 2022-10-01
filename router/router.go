@@ -29,9 +29,13 @@ func Start() {
 	user.GET("/query/detail", controller.UserQueryDetail)
 	// 发送接收消息
 	user.GET("/websocket/message", controller.WebsocketMessage)
-
 	//用户聊天记录列表
 	user.GET("/chat/list", controller.ChatList)
+
+	//添加用户
+	user.POST("/add", controller.UserAdd)
+	//删除用户
+	user.DELETE("/delete", controller.UserDelete)
 
 	r.Run()
 }

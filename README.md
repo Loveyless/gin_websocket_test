@@ -63,6 +63,7 @@ room
 
 ```Go
 {
+    "identity":"房间唯一标识",
     "number":"房间号",
     "name":"房间名",
     "info":"简介",
@@ -473,17 +474,23 @@ func WebsocketMessage(c *gin.Context) {
 
 get请求/query/detail
 
-还是比较小复杂的 对比两个人you'mei
+还是比较小复杂的 对比两个人有没有相同的房间
 
 
 
 
 
+## 添加好友/删除好友
 
 
 
+1. 添加好友
 
+初步想法
 
+查看是否为好友
+
+不是的话 给两个人弄用一个房间id存在room_basic表中
 
 
 

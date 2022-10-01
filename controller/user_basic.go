@@ -213,7 +213,7 @@ func Register(c *gin.Context) {
 	emailCode, err := service.Rdb.Get(context.Background(), config.RegisterPrefix+info.Email).Result()
 	if err != nil {
 		c.JSON(200, gin.H{
-			"status":  200,
+			"status":  400,
 			"message": "验证码已过期",
 			"data":    err.Error(),
 		})
@@ -222,7 +222,7 @@ func Register(c *gin.Context) {
 	}
 	if emailCode != info.Code {
 		c.JSON(200, gin.H{
-			"status":  200,
+			"status":  400,
 			"message": "验证码错误",
 			"data":    gin.H{},
 		})
@@ -231,11 +231,11 @@ func Register(c *gin.Context) {
 	}
 
 	// 判断账号是否唯一
-	exist1 := service.GetUserBasicByUsername(info.Username)
-	exist2 := service.GetUserBasicByEmail(info.Email)
-	if exist1 || exist2 {
+	_, err = service.GetUserBasicByUsername(info.Username)
+	exist := service.GetUserBasicByEmail(info.Email)
+	if err == nil || exist {
 		c.JSON(200, gin.H{
-			"status":  200,
+			"status":  400,
 			"message": "用户名或邮箱已存在",
 			"data":    gin.H{},
 		})
@@ -337,4 +337,175 @@ func SendCode(c *gin.Context) {
 		"message": "发送成功",
 		"data":    nil,
 	})
+}
+
+//添加用户
+func UserAdd(c *gin.Context) {
+
+	//获取请求数据并验证
+	info := new(struct {
+		Username string `json:"user_name" binding:"required,min=3,max=20"`
+	})
+	err := c.ShouldBind(&info)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"status":  400,
+			"message": "请求失败",
+			"data":    validator.Translate(err),
+		})
+		c.Abort()
+		return
+	}
+
+	//判断账号是否存在
+	ub, err := service.GetUserBasicByUsername(info.Username)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"status":  400,
+			"message": "用户不存在",
+			"data":    gin.H{},
+		})
+		c.Abort()
+		return
+	}
+
+	//是否好友关系
+	claims := c.MustGet("claims").(*MyJwt.MyCustomClaims)
+	b, _ := service.JudgeUserIsFriend(claims.Identity, ub.Identity)
+	if b {
+		c.JSON(200, gin.H{
+			"status":  400,
+			"message": "已是好友",
+			"data":    gin.H{},
+		})
+		c.Abort()
+		return
+	}
+
+	//保存房间记录  这里就是加了一条房间信息 创建者就是加好友的发起者
+	rb := &service.RoomBasic{
+		// Number: ,房间号
+		// Name: ,  房间名
+		// Info: ,  房间简介    单聊没有这三个
+		Identity:     MyUtils.Uuid(),  //房间唯一标识
+		UserIdentity: claims.Identity, //房间创建者id 也就是我的id (这里我的id就是token里的identity)
+		CratedAt:     time.Now().Unix(),
+		UpdatedAt:    time.Now().Unix(),
+	}
+	err = service.InsertOneRoomBasic(rb)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"status":  400,
+			"message": "添加room_basic失败",
+			"data":    err,
+		})
+		c.Abort()
+		return
+	}
+
+	//保存用户与房间的关联记录 这里就是拿上面的房间id 与我的id/好友id 存两条记录
+	//第一个
+	ur := &service.UserRoom{
+		UserIdentity: claims.Identity, //我的id
+		RoomIdentity: rb.Identity,     //房间id
+		RoomType:     1,               //单聊
+		CratedAt:     time.Now().Unix(),
+		UpdatedAt:    time.Now().Unix(),
+	}
+	err = service.InsertOneUserRoom(ur)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"status":  400,
+			"message": "添加user_room失败",
+			"data":    err,
+		})
+		c.Abort()
+		return
+	}
+	//第二个
+	ur = &service.UserRoom{
+		UserIdentity: ub.Identity, //对方的id
+		RoomIdentity: rb.Identity, //房间id
+		RoomType:     1,           //单聊
+		CratedAt:     time.Now().Unix(),
+		UpdatedAt:    time.Now().Unix(),
+	}
+	err = service.InsertOneUserRoom(ur)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"status":  400,
+			"message": "添加user_room失败",
+			"data":    err,
+		})
+		c.Abort()
+		return
+	}
+
+	//返回
+	c.JSON(200, gin.H{
+		"status":  200,
+		"message": "添加成功",
+		"data":    gin.H{},
+	})
+}
+
+//删除用户
+func UserDelete(c *gin.Context) {
+	claim := c.MustGet("claims").(*MyJwt.MyCustomClaims)
+
+	ubId := c.Query("user_identity")
+	if ubId == "" {
+		c.JSON(200, gin.H{
+			"status":  400,
+			"message": "无此用户",
+			"data":    gin.H{},
+		})
+		c.Abort()
+		return
+	}
+
+	//获取房间identity 通过双方id
+	fmt.Println(claim.Identity, ubId)
+	userRoomIdentity := service.GetUserRoomIdentity(claim.Identity, ubId)
+	if userRoomIdentity == "" {
+		c.JSON(200, gin.H{
+			"status":  200,
+			"message": "与对方不是好友",
+			"data":    gin.H{},
+		})
+		c.Abort()
+		return
+	}
+
+	//通过房间id删除俩人的关联记录 RoomBasic
+	err := service.DeleteRoomBasicByRoomIdentity(userRoomIdentity)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"status":  400,
+			"message": "房间不存在",
+			"data":    err,
+		})
+		c.Abort()
+		return
+	}
+
+	//通过房间id和双方id 删除俩人的关联记录 UserRoom
+	err = service.DeleteUserRoomByRoomIdentity(userRoomIdentity)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"status":  400,
+			"message": "房间不存在",
+			"data":    err,
+		})
+		c.Abort()
+		return
+	}
+
+	//返回
+	c.JSON(200, gin.H{
+		"status":  200,
+		"message": "删除成功",
+		"data":    gin.H{},
+	})
+
 }

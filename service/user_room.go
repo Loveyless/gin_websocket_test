@@ -58,7 +58,7 @@ func JudgeUserIsFriend(userIdentity1, userIdentity2 string) (bool, error) {
 	// 	CountDocuments(context.Background(), bson.D{{Key: "user_identity", Value: userIdentity1}, {Key: "room_type", Value: 1}, {Key: "room_identity", Value: userIdentity2}})
 
 	//查出id1的所有单聊房间数据
-	fmt.Println("userIdentity1", userIdentity1, "userIdentity2", userIdentity2)
+	// fmt.Println("userIdentity1", userIdentity1, "userIdentity2", userIdentity2)
 	cur, err := Mongo.Collection(UserRoom{}.CollectionName()).Find(context.Background(), bson.D{{Key: "user_identity", Value: userIdentity1}, {Key: "room_type", Value: 1}})
 	if err != nil {
 		log.Println(userIdentity1, "查找id数据出错", err.Error())
@@ -73,14 +73,53 @@ func JudgeUserIsFriend(userIdentity1, userIdentity2 string) (bool, error) {
 		}
 		curList = append(curList, item.RoomIdentity)
 	}
-	fmt.Println(curList)
+	// fmt.Println(curList)
 
 	//获取关联id2的单聊房间个数 获取一下id2的所有单聊房间有没有id1的房间
 	i, err := Mongo.Collection(UserRoom{}.CollectionName()).CountDocuments(context.Background(), bson.M{"user_identity": userIdentity2, "room_type": 1, "room_identity": bson.M{"$in": curList}})
 	if err != nil {
 		log.Println(err.Error())
 	}
-	fmt.Println(i)
+	// fmt.Println(i)
 
 	return i > 0, err
+}
+
+//得到两人的单聊房间id
+func GetUserRoomIdentity(userIdentity1, userIdentity2 string) string {
+
+	//查出id1的所有单聊房间数据
+	cur, err := Mongo.Collection(UserRoom{}.CollectionName()).Find(context.Background(), bson.D{{Key: "user_identity", Value: userIdentity1}, {Key: "room_type", Value: 1}})
+	if err != nil {
+		log.Println(userIdentity1, "查找id数据出错", err.Error())
+		return ""
+	}
+	//将id1的所有房间id存入切片
+	curList := make([]string, 0)
+	for cur.Next(context.Background()) {
+		item := new(UserRoom)
+		err := cur.Decode(item)
+		if err != nil {
+			log.Println(err.Error())
+		}
+		curList = append(curList, item.RoomIdentity)
+	}
+
+	//获取关联id2的单聊房间个数 获取一下id2的所有单聊房间有没有id1的房间
+	ur := new(UserRoom)
+	err = Mongo.Collection(UserRoom{}.CollectionName()).
+		FindOne(context.Background(), bson.M{"user_identity": userIdentity2, "room_type": 1, "room_identity": bson.M{"$in": curList}}).Decode(&ur)
+	if err != nil {
+		log.Println(err.Error())
+		return ""
+	}
+
+	return ur.RoomIdentity
+}
+
+//删除userroom双方关联信息(私聊)
+func DeleteUserRoomByRoomIdentity(userRoomIdentity string) error {
+	_, err := Mongo.Collection(UserRoom{}.CollectionName()).
+		DeleteMany(context.Background(), bson.D{{Key: "room_identity", Value: userRoomIdentity}, {Key: "room_type", Value: 1}})
+	return err
 }

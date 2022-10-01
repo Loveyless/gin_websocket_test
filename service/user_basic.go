@@ -57,14 +57,21 @@ func GetUserBasicByEmail(emailString string) bool {
 }
 
 //查询用户通过用户名 (用于校验数据库是否有这个用户名)
-func GetUserBasicByUsername(username string) bool {
-	sum, err := Mongo.Collection(UserBasic{}.CollectionName()).
-		CountDocuments(context.TODO(), bson.D{{Key: "username", Value: username}})
-	return (err == nil && sum > 0)
+func GetUserBasicByUsername(username string) (*UserBasic, error) {
+	ub := new(UserBasic)
+	err := Mongo.Collection(UserBasic{}.CollectionName()).
+		FindOne(context.TODO(), bson.D{{Key: "username", Value: username}}).Decode(ub)
+	return ub, err
 }
 
 //添加用户
 func InsertUserBasic(userBasic *UserBasic) error {
 	_, err := Mongo.Collection(UserBasic{}.CollectionName()).InsertOne(context.TODO(), userBasic)
+	return err
+}
+
+//添加房间关联关系
+func InsertOneUserRoom(ur *UserRoom) error {
+	_, err := Mongo.Collection(UserRoom{}.CollectionName()).InsertOne(context.Background(), ur)
 	return err
 }

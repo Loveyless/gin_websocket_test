@@ -64,7 +64,7 @@ func WebsocketAll(c *gin.Context) {
 		err := conn.ReadJSON(messaageInfo) //readjson格式化到结构体 ReadMessage是原始的 单测用的message接收的可以去看 发送可以用message
 		if err != nil {
 			log.Println("拿到发送过来的数据异常", err.Error())
-			return
+			continue
 		}
 
 		// 5.发送消息
@@ -75,7 +75,7 @@ func WebsocketAll(c *gin.Context) {
 			err := conn.WriteMessage(websocket.TextMessage, resJson)
 			if err != nil {
 				log.Println("发送数据失败", err.Error())
-				return
+				continue
 			}
 		}
 	}

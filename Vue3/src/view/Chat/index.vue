@@ -43,9 +43,10 @@ const sendMessage = async () => {
 }
 
 
-onUnmounted(() => {
-  ws.close()
-})
+// onUnmounted(() => {
+//   console.log('onUnmounted')
+//   ws.close()
+// })
 
 </script> 
 

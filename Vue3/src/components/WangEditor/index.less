@@ -1,0 +1,19 @@
+.btn {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: row-reverse;
+  :deep(.el-button) {
+    margin-left: 10px;
+  }
+}
+
+//富文本移动端自适应
+@media (max-width: 750px) {
+  .show_text_box {
+    background-size: contain; //contain:图片自身的宽高比不变，缩放至图片自身能完全显示出来，所以容器会有留白区域；
+    width: 100%;
+    height: auto;
+    margin: 0 auto;
+    display: block;
+  }
+}

@@ -10,6 +10,7 @@ import (
 
 func Start() {
 
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.Use(cors.Cors())
 
@@ -27,8 +28,10 @@ func Start() {
 	user.GET("/detail", controller.UserDetail)
 	// 用户详情 用传递的identity获取
 	user.GET("/query/detail", controller.UserQueryDetail)
-	// 发送接收消息
-	user.GET("/websocket/message", controller.WebsocketMessage)
+	// 发送接收消息 不在user分组 因为user分组需要验证token js里的websocket不能随便带请求头 只能自己解析
+	r.GET("/websocket/message", controller.WebsocketMessage)
+	// 群聊 目前用这个
+	r.GET("/websocket/all", controller.WebsocketAll)
 	//用户聊天记录列表
 	user.GET("/chat/list", controller.ChatList)
 

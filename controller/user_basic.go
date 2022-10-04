@@ -39,12 +39,12 @@ func Login(c *gin.Context) {
 	}
 
 	//查询用户
-	u, err := service.GetUserBasicByUsernamePassword(userInfo.Username, userInfo.Password)
+	u, err := service.GetUserBasicByUsernamePassword(userInfo.Username, MyUtils.Md5(userInfo.Password))
 	if err != nil {
 		c.JSON(200, gin.H{
 			"status":  400,
-			"message": "查询不到值",
-			"data":    validator.Translate(err),
+			"message": "查询不到该用户",
+			"data":    err.Error(),
 		})
 		c.Abort()
 		return

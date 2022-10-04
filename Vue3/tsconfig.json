@@ -1,0 +1,64 @@
+{
+  //编译器选项
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "jsx": "preserve",
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "noImplicitAny": false, //隐式类型any的报错
+    "noImplicitThis":false, //this隐式类型为any时报错
+    "alwaysStrict": false, //每个文件都是严格模式 "use strict"
+    // "strictNullChecks": true, //严格的空检查
+    // "strictFunctionTypes": true, //严格的函数类型检查
+    // "strictBindCallApply":true, //严格的 'bind', 'call', and 'apply' methods on functions.
+    // "strictPropertyInitialization":true, //类中严格的属性初始化检查
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
+    // 跳过所有.d.ts文件的类型检查 解决打包失败
+    "skipLibCheck": true,
+    // 如果您使用 Volar，请在 tsconfig.json 中通过 compilerOptions.type 指定全局组件类型。
+    "types": [
+      "element-plus/global",
+      "vite/client"
+    ],
+    //解析非相对模块名的基准目录
+    "baseUrl": "./",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@v/*": [
+        "src/view/*"
+      ],
+      "@c/*": [
+        "src/components/*"
+      ],
+    },
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "auto-imports.d.ts",
+    "config/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.js"
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
+}

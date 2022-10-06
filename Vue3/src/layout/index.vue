@@ -16,7 +16,7 @@
 
 
       <!-- <el-footer> -->
-      <Header />
+      <Footer />
       <!-- </el-footer> -->
 
     </el-container>

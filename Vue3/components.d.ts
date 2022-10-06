@@ -12,7 +12,7 @@ declare module '@vue/runtime-core' {
     DiaLog: typeof import('./src/components/DiaLog/index.vue')['default']
     ElContainer: typeof import('element-plus/es')['ElContainer']
     ElMain: typeof import('element-plus/es')['ElMain']
-    Header: typeof import('./src/layout/Header.vue')['default']
+    Footer: typeof import('./src/layout/Footer.vue')['default']
     Home: typeof import('./src/view/Home/index.vue')['default']
     Login: typeof import('./src/view/Login/index.vue')['default']
     MyImg: typeof import('./src/components/ErrorImage/MyImg.vue')['default']
